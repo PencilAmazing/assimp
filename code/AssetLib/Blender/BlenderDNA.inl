@@ -179,7 +179,7 @@ void Structure :: ReadFieldArray2(T (& out)[M][N], const char* name, const FileD
 //--------------------------------------------------------------------------------
 template <int error_policy, template <typename> class TOUT, typename T>
 bool Structure :: ReadFieldPtr(TOUT<T>& out, const char* name, const FileDatabase& db,
-    bool non_recursive /*= false*/) const
+    bool non_recursive /*= false*/, const Structure* override_structure /*= nullptr*/) const
 {
     const StreamReaderAny::pos old = db.reader->GetCurrentPos();
     Pointer ptrval;
@@ -206,7 +206,7 @@ bool Structure :: ReadFieldPtr(TOUT<T>& out, const char* name, const FileDatabas
     }
 
     // resolve the pointer and load the corresponding structure
-    const bool res = ResolvePointer(out,ptrval,db,*f, non_recursive);
+    const bool res = ResolvePointer(out,ptrval,db,*f, non_recursive, override_structure);
 
     if(!non_recursive) {
         // and recover the previous stream position
@@ -408,13 +408,14 @@ bool Structure::ReadFieldPtrVector(vector<TOUT<T>>&out, const char* name, const 
 template <template <typename> class TOUT, typename T>
 bool Structure :: ResolvePointer(TOUT<T>& out, const Pointer & ptrval, const FileDatabase& db,
     const Field& f,
-    bool non_recursive /*= false*/) const
+    bool non_recursive /*= false*/, const Structure* override_structure /*= nullptr*/) const
 {
     out.reset(); // ensure null pointers work
     if (!ptrval.val) {
         return false;
     }
-    const Structure& s = db.dna[f.type];
+    
+    const Structure& s = (override_structure) ? *override_structure : db.dna[f.type];
     // find the file block the pointer is pointing to
     const FileBlockHead* block = LocateFileBlockForAddress(ptrval,db);
 
@@ -469,7 +470,8 @@ bool Structure :: ResolvePointer(TOUT<T>& out, const Pointer & ptrval, const Fil
 inline bool Structure :: ResolvePointer( std::shared_ptr< FileOffset >& out, const Pointer & ptrval,
     const FileDatabase& db,
     const Field&,
-    bool) const
+    bool,
+    const Structure*) const
 {
     // Currently used exclusively by PackedFile::data to represent
     // a simple offset into the mapped BLEND file.
@@ -491,7 +493,8 @@ template <template <typename> class TOUT, typename T>
 bool Structure :: ResolvePointer(vector< TOUT<T> >& out, const Pointer & ptrval,
     const FileDatabase& db,
     const Field& f,
-    bool) const
+    bool,
+    const Structure*) const
 {
     // This is a function overload, not a template specialization. According to
     // the partial ordering rules, it should be selected by the compiler
@@ -530,7 +533,8 @@ template <> bool Structure :: ResolvePointer<std::shared_ptr,ElemBase>(std::shar
     const Pointer & ptrval,
     const FileDatabase& db,
     const Field&,
-    bool
+    bool,
+    const Structure*
 ) const
 {
     // Special case when the data type needs to be determined at runtime.

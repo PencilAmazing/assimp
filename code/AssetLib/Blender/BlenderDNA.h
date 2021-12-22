@@ -294,7 +294,7 @@ public:
     template <int error_policy, template <typename> class TOUT, typename T>
     bool ReadFieldPtr(TOUT<T> &out, const char *name,
             const FileDatabase &db,
-            bool non_recursive = false) const;
+            bool non_recursive = false, const Structure* override_field = nullptr) const;
 
     // --------------------------------------------------------
     // field parsing for static arrays of pointer or dynamic
@@ -338,16 +338,16 @@ private:
     template <template <typename> class TOUT, typename T>
     bool ResolvePointer(TOUT<T> &out, const Pointer &ptrval,
             const FileDatabase &db, const Field &f,
-            bool non_recursive = false) const;
+            bool non_recursive = false, const Structure* override_structure = nullptr) const;
 
     // --------------------------------------------------------
     template <template <typename> class TOUT, typename T>
     bool ResolvePointer(vector<TOUT<T>> &out, const Pointer &ptrval,
-            const FileDatabase &db, const Field &f, bool) const;
+            const FileDatabase &db, const Field &f, bool, const Structure*) const;
 
     // --------------------------------------------------------
     bool ResolvePointer(std::shared_ptr<FileOffset> &out, const Pointer &ptrval,
-            const FileDatabase &db, const Field &f, bool) const;
+            const FileDatabase &db, const Field &f, bool, const Structure*) const;
 
     // --------------------------------------------------------
     inline const FileBlockHead *LocateFileBlockForAddress(
@@ -429,7 +429,8 @@ inline bool Structure ::ResolvePointer<std::shared_ptr, ElemBase>(std::shared_pt
         const Pointer &ptrval,
         const FileDatabase &db,
         const Field &f,
-        bool) const;
+        bool,
+        const Structure*) const;
 
 // -------------------------------------------------------------------------------
 /** Represents the full data structure information for a single BLEND file.
