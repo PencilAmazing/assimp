@@ -277,6 +277,37 @@ struct MDeformVert : ElemBase {
 };
 
 // -------------------------------------------------------------------------------
+struct bNodeSocket : ElemBase {
+    char idname[64];
+    char identifier[64];
+    std::shared_ptr<bNodeSocket> next, prev;
+};
+
+// -------------------------------------------------------------------------------
+struct bNode : ElemBase {
+    std::shared_ptr<Image> id; // Points to the top of a Image struct
+    ListBase inputs, outputs; // bNodeSocket
+    char name[64];
+};
+
+// -------------------------------------------------------------------------------
+struct bNodeLink : ElemBase {
+    /* Used as boolean */
+    short is_valid;
+    short is_muted;
+
+    std::shared_ptr<bNodeLink> next, prev;
+    std::shared_ptr<bNode> fromnode, tonode;
+    std::shared_ptr<bNodeSocket> fromsocket, tosocket;
+};
+
+// -------------------------------------------------------------------------------
+struct bNodeTree : ElemBase {
+    ID id;
+    ListBase nodes, links; // bNode, bNodeLink
+};
+
+// -------------------------------------------------------------------------------
 #define MA_RAYMIRROR 0x40000
 #define MA_TRANSPARENCY 0x10000
 #define MA_RAYTRANSP 0x20000
@@ -284,6 +315,8 @@ struct MDeformVert : ElemBase {
 
 struct Material : ElemBase {
     ID id FAIL;
+
+    /* I think a lot of these do not exist anymore 2.80+ */
 
     float r, g, b WARN;
     float specr, specg, specb WARN;
@@ -381,6 +414,9 @@ struct Material : ElemBase {
 
     char seed1;
     char seed2;
+
+    char use_nodes;
+    std::shared_ptr<bNodeTree> node_tree;
 
     std::shared_ptr<Group> group;
 

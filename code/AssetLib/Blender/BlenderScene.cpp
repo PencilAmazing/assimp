@@ -348,6 +348,72 @@ void Structure ::Convert<MTFace>(
 
 //--------------------------------------------------------------------------------
 template <>
+void Structure::Convert<bNodeSocket>(
+        bNodeSocket &dest,
+        const FileDatabase &db) const {
+
+    ReadFieldArray<ErrorPolicy_Warn>(dest.idname, "idname", db);
+    ReadFieldArray<ErrorPolicy_Warn>(dest.identifier, "identifier", db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.next, "*next", db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.prev, "*prev", db);
+
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure::Convert<bNode>(
+        bNode &dest,
+        const FileDatabase &db) const {
+
+    // when name == "Image Texture", dest.storage points to a NodeTexImage struct
+    // and the "*id" field points to the top of an Image struct
+    ReadFieldArray<ErrorPolicy_Fail>(dest.name, "name", db);
+    ReadField<ErrorPolicy_Fail>(dest.inputs, "inputs", db);
+    ReadField<ErrorPolicy_Fail>(dest.outputs, "outputs", db);
+    if (std::string("Image Texture") == dest.name) {
+        // ReadFieldPtr sees an ID pointer and gets confused when the data describes an image
+        // So we're passing in a structure to expect instead of what's written on disk
+        ReadFieldPtr<ErrorPolicy_Warn>(dest.id, "*id", db, false, &db.dna["Image"]);
+    }
+
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure::Convert<bNodeLink>(
+        bNodeLink &dest,
+        const FileDatabase &db) const {
+
+    ReadField<ErrorPolicy_Fail>(dest.is_valid, "is_valid", db);
+    ReadField<ErrorPolicy_Warn>(dest.is_muted, "is_muted", db);
+
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.next, "*next", db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.prev, "*prev", db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.fromnode, "*fromnode", db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.tonode, "*tonode", db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.fromsocket, "*fromsocket", db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.tosocket, "*tosocket", db);
+
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure::Convert<bNodeTree>(
+        bNodeTree &dest,
+        const FileDatabase &db) const {
+
+    ReadField<ErrorPolicy_Fail>(dest.id, "id", db);
+    ReadField<ErrorPolicy_Fail>(dest.nodes, "nodes", db);
+    ReadField<ErrorPolicy_Fail>(dest.links, "links", db);
+
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
 void Structure ::Convert<Material>(
         Material &dest,
         const FileDatabase &db) const {
@@ -462,6 +528,9 @@ void Structure ::Convert<Material>(
 
     ReadField<ErrorPolicy_Igno>(dest.seed1, "seed1", db);
     ReadField<ErrorPolicy_Igno>(dest.seed2, "seed2", db);
+
+    ReadField<ErrorPolicy_Igno>(dest.use_nodes, "use_nodes", db);
+    ReadFieldPtr<ErrorPolicy_Igno>(dest.node_tree, "*nodetree", db);
 
     db.reader->IncPtr(size);
 }
@@ -857,6 +926,10 @@ void DNA::RegisterConverters() {
     converters["Base"] = DNA::FactoryPair(&Structure::Allocate<Base>, &Structure::Convert<Base>);
     converters["MTFace"] = DNA::FactoryPair(&Structure::Allocate<MTFace>, &Structure::Convert<MTFace>);
     converters["Material"] = DNA::FactoryPair(&Structure::Allocate<Material>, &Structure::Convert<Material>);
+    converters["bNodeSocket"] = DNA::FactoryPair(&Structure::Allocate<bNodeSocket>, &Structure::Convert<bNodeSocket>);
+    converters["bNode"] = DNA::FactoryPair(&Structure::Allocate<bNode>, &Structure::Convert<bNode>);
+    converters["bNodeLink"] = DNA::FactoryPair(&Structure::Allocate<bNodeLink>, &Structure::Convert<bNodeLink>);
+    converters["bNodeTree"] = DNA::FactoryPair(&Structure::Allocate<bNodeTree>, &Structure::Convert<bNodeTree>);
     converters["MTexPoly"] = DNA::FactoryPair(&Structure::Allocate<MTexPoly>, &Structure::Convert<MTexPoly>);
     converters["Mesh"] = DNA::FactoryPair(&Structure::Allocate<Mesh>, &Structure::Convert<Mesh>);
     converters["MDeformVert"] = DNA::FactoryPair(&Structure::Allocate<MDeformVert>, &Structure::Convert<MDeformVert>);

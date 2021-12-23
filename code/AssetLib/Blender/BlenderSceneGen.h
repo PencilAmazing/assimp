@@ -122,6 +122,29 @@ template <> void Structure :: Convert<MTFace> (
     ) const
 ;
 
+template <> void Structure :: Convert<bNodeSocket>(
+    bNodeSocket& dest,
+    const FileDatabase& db) const
+;
+
+template <> void Structure :: Convert<bNode> (
+    bNode& dest,
+    const FileDatabase& db
+    ) const
+;
+
+template <> void Structure :: Convert<bNodeLink>(
+    bNodeLink& dest,
+    const FileDatabase& db
+    ) const
+;
+
+template <> void Structure :: Convert<bNodeTree> (
+    bNodeTree& dest,
+    const FileDatabase& db
+    ) const
+;
+
 template <> void Structure :: Convert<Material> (
     Material& dest,
     const FileDatabase& db
