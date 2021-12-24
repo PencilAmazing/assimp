@@ -386,8 +386,8 @@ void Structure::Convert<bNodeLink>(
         bNodeLink &dest,
         const FileDatabase &db) const {
 
-    ReadField<ErrorPolicy_Fail>(dest.is_valid, "is_valid", db);
-    ReadField<ErrorPolicy_Warn>(dest.is_muted, "is_muted", db);
+    ReadField<ErrorPolicy_Igno>(dest.is_valid, "is_valid", db);
+    ReadField<ErrorPolicy_Igno>(dest.is_muted, "is_muted", db);
 
     ReadFieldPtr<ErrorPolicy_Warn>(dest.next, "*next", db);
     ReadFieldPtr<ErrorPolicy_Warn>(dest.prev, "*prev", db);
@@ -406,8 +406,8 @@ void Structure::Convert<bNodeTree>(
         const FileDatabase &db) const {
 
     ReadField<ErrorPolicy_Fail>(dest.id, "id", db);
-    ReadField<ErrorPolicy_Fail>(dest.nodes, "nodes", db);
-    ReadField<ErrorPolicy_Fail>(dest.links, "links", db);
+    ReadField<ErrorPolicy_Igno>(dest.nodes, "nodes", db);
+    ReadField<ErrorPolicy_Igno>(dest.links, "links", db);
 
     db.reader->IncPtr(size);
 }
@@ -529,7 +529,7 @@ void Structure ::Convert<Material>(
     ReadField<ErrorPolicy_Igno>(dest.seed1, "seed1", db);
     ReadField<ErrorPolicy_Igno>(dest.seed2, "seed2", db);
 
-    ReadField<ErrorPolicy_Igno>(dest.use_nodes, "use_nodes", db);
+    ReadField<ErrorPolicy_Warn>(dest.use_nodes, "use_nodes", db);
     ReadFieldPtr<ErrorPolicy_Igno>(dest.node_tree, "*nodetree", db);
 
     db.reader->IncPtr(size);
