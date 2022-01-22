@@ -85,6 +85,8 @@ struct Lamp;
 struct MTex;
 struct Image;
 struct Material;
+struct bNode;
+struct bNodeTree;
 } // namespace Blender
 
 // BlenderIntermediate.h
@@ -157,6 +159,11 @@ private:
     // --------------------
     void BuildMaterials(
             Blender::ConversionData &conv_data);
+
+    // --------------------
+    void ResolveNodeTree(
+            Blender::ConversionData &conv_data,
+            const Blender::bNodeTree *nodetree);
 
     // --------------------
     void ResolveTexture(

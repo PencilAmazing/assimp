@@ -348,12 +348,41 @@ void Structure ::Convert<MTFace>(
 
 //--------------------------------------------------------------------------------
 template <>
+void Structure::Convert<bNodeSocketValueRGBA>(
+        bNodeSocketValueRGBA &dest,
+        const FileDatabase &db) const {
+    ReadFieldArray<ErrorPolicy_Igno>(dest.value, "value", db);
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure::Convert<bNodeSocketValueVector>(
+    bNodeSocketValueVector& dest,
+    const FileDatabase& db) const
+{
+    ReadFieldArray<ErrorPolicy_Igno>(dest.value, "value", db);
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
+void Structure::Convert<bNodeSocketValueFloat>(
+    bNodeSocketValueFloat& dest,
+    const FileDatabase& db) const
+{
+    ReadField<ErrorPolicy_Igno>(dest.value, "value", db);
+    db.reader->IncPtr(size);
+}
+
+//--------------------------------------------------------------------------------
+template <>
 void Structure::Convert<bNodeSocket>(
         bNodeSocket &dest,
         const FileDatabase &db) const {
 
-    ReadFieldArray<ErrorPolicy_Warn>(dest.idname, "idname", db);
-    ReadFieldArray<ErrorPolicy_Warn>(dest.identifier, "identifier", db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.default_value, "*default_value", db);
+    ReadFieldArray<ErrorPolicy_Fail>(dest.identifier, "identifier", db);
     ReadFieldPtr<ErrorPolicy_Warn>(dest.next, "*next", db);
     ReadFieldPtr<ErrorPolicy_Warn>(dest.prev, "*prev", db);
 
@@ -371,8 +400,10 @@ void Structure::Convert<bNode>(
     ReadFieldArray<ErrorPolicy_Fail>(dest.name, "name", db);
     ReadField<ErrorPolicy_Fail>(dest.inputs, "inputs", db);
     ReadField<ErrorPolicy_Fail>(dest.outputs, "outputs", db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.next, "*next", db);
+    ReadFieldPtr<ErrorPolicy_Warn>(dest.prev, "*prev", db);
     if (std::string("Image Texture") == dest.name) {
-        // ReadFieldPtr sees an ID pointer and gets confused when the data describes an image
+        // ReadFieldPtr sees an ID pointer and gets confused when the data describes something else
         // So we're passing in a structure to expect instead of what's written on disk
         ReadFieldPtr<ErrorPolicy_Warn>(dest.id, "*id", db, false, &db.dna["Image"]);
     }
@@ -926,6 +957,9 @@ void DNA::RegisterConverters() {
     converters["Base"] = DNA::FactoryPair(&Structure::Allocate<Base>, &Structure::Convert<Base>);
     converters["MTFace"] = DNA::FactoryPair(&Structure::Allocate<MTFace>, &Structure::Convert<MTFace>);
     converters["Material"] = DNA::FactoryPair(&Structure::Allocate<Material>, &Structure::Convert<Material>);
+    converters["bNodeSocketValueRGBA"] = DNA::FactoryPair(&Structure::Allocate<bNodeSocketValueRGBA>, &Structure::Convert<bNodeSocketValueRGBA>);
+    converters["bNodeSocketValueFloat"] = DNA::FactoryPair(&Structure::Allocate<bNodeSocketValueFloat>, &Structure::Convert<bNodeSocketValueFloat>);
+    converters["bNodeSocketValueVector"] = DNA::FactoryPair(&Structure::Allocate<bNodeSocketValueVector>, &Structure::Convert<bNodeSocketValueVector>);
     converters["bNodeSocket"] = DNA::FactoryPair(&Structure::Allocate<bNodeSocket>, &Structure::Convert<bNodeSocket>);
     converters["bNode"] = DNA::FactoryPair(&Structure::Allocate<bNode>, &Structure::Convert<bNode>);
     converters["bNodeLink"] = DNA::FactoryPair(&Structure::Allocate<bNodeLink>, &Structure::Convert<bNodeLink>);

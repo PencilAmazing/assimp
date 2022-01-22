@@ -682,6 +682,14 @@ void BlenderImporter::BuildMaterials(ConversionData &conv_data) {
 
     for (const std::shared_ptr<Material> &mat : conv_data.materials_raw) {
 
+        if (mat->use_nodes) {
+            if (mat->node_tree) {
+                ResolveNodeTree(conv_data, mat->node_tree.get()); // TODO implement :^)
+            } else
+                //ThrowException("Material ", aiString(mat->id.name), " uses nodes but no node tree was found");
+                continue;
+        }
+
         // reset per material global counters
         for (size_t i = 0; i < sizeof(conv_data.next_texture) / sizeof(conv_data.next_texture[0]); ++i) {
             conv_data.next_texture[i] = 0;
@@ -739,6 +747,43 @@ void BlenderImporter::BuildMaterials(ConversionData &conv_data) {
         }
 
         AddBlendParams(mout, mat.get());
+    }
+}
+
+void Assimp::BlenderImporter::ResolveNodeTree(Blender::ConversionData &conv_data, const Blender::bNodeTree *nodetree) {
+    (void)conv_data;
+
+    // Should probably follow the output node instead
+
+    std::shared_ptr<bNode> bsdf = nullptr;
+    for (std::shared_ptr<bNode> node = std::static_pointer_cast<bNode>(nodetree->nodes.first); node; node = node->next) {
+        if (aiString("Principled BSDF") == aiString(node->name)) {
+            bsdf = node;
+            break;
+        }
+    }
+    if (!bsdf)
+        ThrowException("Principled BSDF node not found");
+
+    aiMaterial *mout = new aiMaterial();
+    conv_data.materials->push_back(mout);
+
+    aiColor3D col;
+    for (std::shared_ptr<bNodeSocket> socket = std::static_pointer_cast<bNodeSocket>(bsdf->inputs.first); socket; socket = socket->next) {
+        if (socket->identifier == "Base Color") {
+            float *rgba = std::static_pointer_cast<bNodeSocketValueRGBA>(socket->default_value)->value;
+            col = aiColor3D(rgba[0], rgba[1], rgba[2]);
+            mout->AddProperty(&col, 1, AI_MATKEY_COLOR_DIFFUSE);
+        }
+        if (socket->identifier == "Emission") {
+            float *emit = std::static_pointer_cast<bNodeSocketValueRGBA>(socket->default_value)->value;
+            col = aiColor3D(emit[0], emit[1], emit[2]);
+            mout->AddProperty(&col, 1, AI_MATKEY_COLOR_EMISSIVE);
+        }
+        if (socket->identifier == "Specular") {
+            // Is a float for principled bsdf, array for specular bsdf
+            // https://docs.blender.org/manual/en/latest/render/shader_nodes/shader/specular_bsdf.html
+        }
     }
 }
 

@@ -277,9 +277,26 @@ struct MDeformVert : ElemBase {
 };
 
 // -------------------------------------------------------------------------------
+struct bNodeSocketValueRGBA : ElemBase {
+    float value[4];
+};
+
+// -------------------------------------------------------------------------------
+struct bNodeSocketValueVector : ElemBase {
+    float value[3];
+};
+
+// -------------------------------------------------------------------------------
+struct bNodeSocketValueFloat : ElemBase {
+    float value;
+};
+
+// -------------------------------------------------------------------------------
 struct bNodeSocket : ElemBase {
-    char idname[64];
     char identifier[64];
+    /* Blender source says that this is deprecated and we should be reading IDProperty instead
+       but it works so I'm leaving it for the future. */
+    std::shared_ptr<ElemBase> default_value; // bNodeSocketValueVector, bNodeSocketValueRGBA, etc.
     std::shared_ptr<bNodeSocket> next, prev;
 };
 
@@ -287,6 +304,7 @@ struct bNodeSocket : ElemBase {
 struct bNode : ElemBase {
     std::shared_ptr<Image> id; // Points to the top of a Image struct
     ListBase inputs, outputs; // bNodeSocket
+    std::shared_ptr<bNode> next, prev;
     char name[64];
 };
 
