@@ -114,7 +114,8 @@ BlenderImporter::~BlenderImporter() {
     delete modifier_cache;
 }
 
-static const char * const Tokens[] = { "BLENDER" };
+static const char *const Tokens[] = { "BLENDER" };
+static const char *const TokensForSearch[] = { "blender" };
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -685,9 +686,10 @@ void BlenderImporter::BuildMaterials(ConversionData &conv_data) {
         if (mat->use_nodes) {
             if (mat->node_tree) {
                 ResolveNodeTree(conv_data, mat->node_tree.get()); // TODO implement :^)
-            } else
+            } else {
                 //ThrowException("Material ", aiString(mat->id.name), " uses nodes but no node tree was found");
                 continue;
+            }
         }
 
         // reset per material global counters
@@ -750,10 +752,21 @@ void BlenderImporter::BuildMaterials(ConversionData &conv_data) {
     }
 }
 
+const std::shared_ptr<bNodeSocket> Assimp::BlenderImporter::FindInputSocket(const Blender::bNodeTree *tree, const Blender::bNodeSocket *socket) {
+    for (std::shared_ptr<bNodeLink> link = std::static_pointer_cast<bNodeLink>(tree->links.first); link; link = link->next) {
+        // Links point from output --> to input
+        if (link->tosocket.get() == socket) {
+            return link->fromsocket;
+        }
+    }
+    return nullptr;
+}
+
+// TODO: Too big, yank into separate file
 void Assimp::BlenderImporter::ResolveNodeTree(Blender::ConversionData &conv_data, const Blender::bNodeTree *nodetree) {
     (void)conv_data;
 
-    // Should probably follow the output node instead
+    // Should probably follow the selected output node instead of searching for random bsdf
 
     std::shared_ptr<bNode> bsdf = nullptr;
     for (std::shared_ptr<bNode> node = std::static_pointer_cast<bNode>(nodetree->nodes.first); node; node = node->next) {
@@ -769,20 +782,33 @@ void Assimp::BlenderImporter::ResolveNodeTree(Blender::ConversionData &conv_data
     conv_data.materials->push_back(mout);
 
     aiColor3D col;
+    float factor;
+    // Read default values in BSDF node
     for (std::shared_ptr<bNodeSocket> socket = std::static_pointer_cast<bNodeSocket>(bsdf->inputs.first); socket; socket = socket->next) {
-        if (socket->identifier == "Base Color") {
+        aiString identifier = aiString(socket->identifier);
+        if (identifier == aiString("Base Color")) {
+            // This is where image textures are plugged in. We're reading the default value
             float *rgba = std::static_pointer_cast<bNodeSocketValueRGBA>(socket->default_value)->value;
             col = aiColor3D(rgba[0], rgba[1], rgba[2]);
             mout->AddProperty(&col, 1, AI_MATKEY_COLOR_DIFFUSE);
-        }
-        if (socket->identifier == "Emission") {
+        } else if (identifier == aiString("Emission")) {
             float *emit = std::static_pointer_cast<bNodeSocketValueRGBA>(socket->default_value)->value;
             col = aiColor3D(emit[0], emit[1], emit[2]);
             mout->AddProperty(&col, 1, AI_MATKEY_COLOR_EMISSIVE);
-        }
-        if (socket->identifier == "Specular") {
+        } else if (identifier == aiString("Specular")) {
             // Is a float for principled bsdf, array for specular bsdf
             // https://docs.blender.org/manual/en/latest/render/shader_nodes/shader/specular_bsdf.html
+            factor = std::static_pointer_cast<bNodeSocketValueFloat>(socket->default_value)->value;
+            mout->AddProperty(&factor, 1, AI_MATKEY_SPECULAR_FACTOR);
+        } else if (identifier == aiString("Roughness")) {
+            // This is where specular maps are usually plugged.
+            // Should we follow the chain till we hit a texture?
+            // https://blender.stackexchange.com/questions/88792/how-to-plug-specular-map-into-principled-shader
+            factor = std::static_pointer_cast<bNodeSocketValueFloat>(socket->default_value)->value;
+            mout->AddProperty(&factor, 1, AI_MATKEY_ROUGHNESS_FACTOR);
+        } else if (identifier == aiString("Anisotropic")) {
+            factor = std::static_pointer_cast<bNodeSocketValueFloat>(socket->default_value)->value;
+            mout->AddProperty(&factor, 1, AI_MATKEY_ANISOTROPY_FACTOR)
         }
     }
 }

@@ -87,6 +87,7 @@ struct Image;
 struct Material;
 struct bNode;
 struct bNodeTree;
+struct bNodeSocket;
 } // namespace Blender
 
 // BlenderIntermediate.h
@@ -159,6 +160,10 @@ private:
     // --------------------
     void BuildMaterials(
             Blender::ConversionData &conv_data);
+
+    const std::shared_ptr<Blender::bNodeSocket> FindInputSocket(
+            const Blender::bNodeTree *tree,
+            const Blender::bNodeSocket *socket);
 
     // --------------------
     void ResolveNodeTree(
