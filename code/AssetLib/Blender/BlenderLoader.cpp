@@ -781,12 +781,16 @@ void Assimp::BlenderImporter::ResolveNodeTree(Blender::ConversionData &conv_data
     aiMaterial *mout = new aiMaterial();
     conv_data.materials->push_back(mout);
 
+    std::shared_ptr<bNodeSocket> baseColorSocket = nullptr;
+
     aiColor3D col;
     float factor;
     // Read default values in BSDF node
-    for (std::shared_ptr<bNodeSocket> socket = std::static_pointer_cast<bNodeSocket>(bsdf->inputs.first); socket; socket = socket->next) {
+    // This is awful, refactor into separate class before any one sees this
+    for (const std::shared_ptr<bNodeSocket> socket = std::static_pointer_cast<bNodeSocket>(bsdf->inputs.first); socket; socket = socket->next) {
         aiString identifier = aiString(socket->identifier);
         if (identifier == aiString("Base Color")) {
+            baseColorSocket = socket;
             // This is where image textures are plugged in. We're reading the default value
             float *rgba = std::static_pointer_cast<bNodeSocketValueRGBA>(socket->default_value)->value;
             col = aiColor3D(rgba[0], rgba[1], rgba[2]);
@@ -806,9 +810,32 @@ void Assimp::BlenderImporter::ResolveNodeTree(Blender::ConversionData &conv_data
             // https://blender.stackexchange.com/questions/88792/how-to-plug-specular-map-into-principled-shader
             factor = std::static_pointer_cast<bNodeSocketValueFloat>(socket->default_value)->value;
             mout->AddProperty(&factor, 1, AI_MATKEY_ROUGHNESS_FACTOR);
+        } else if (identifier == aiString("Metallic")) {
+            factor = std::static_pointer_cast<bNodeSocketValueFloat>(socket->default_value)->value;
+            mout->AddProperty(&factor, 1, AI_MATKEY_METALLIC_FACTOR);
         } else if (identifier == aiString("Anisotropic")) {
             factor = std::static_pointer_cast<bNodeSocketValueFloat>(socket->default_value)->value;
-            mout->AddProperty(&factor, 1, AI_MATKEY_ANISOTROPY_FACTOR)
+            mout->AddProperty(&factor, 1, AI_MATKEY_ANISOTROPY_FACTOR);
+        } else if (identifier == aiString("Sheen")) {
+            factor = std::static_pointer_cast<bNodeSocketValueFloat>(socket->default_value)->value;
+            mout->AddProperty(&factor, 1, AI_MATKEY_SHEEN_COLOR_FACTOR);
+        } else if (identifier == aiString("Clearcoat")) {
+            factor = std::static_pointer_cast<bNodeSocketValueFloat>(socket->default_value)->value;
+            mout->AddProperty(&factor, 1, AI_MATKEY_CLEARCOAT_FACTOR);
+        } else if (identifier == aiString("Clearcoat Roughness")) {
+            factor = std::static_pointer_cast<bNodeSocketValueFloat>(socket->default_value)->value;
+            mout->AddProperty(&factor, 1, AI_MATKEY_CLEARCOAT_ROUGHNESS_FACTOR);
+        }
+    }
+
+    // Actually get the texture this time
+    // For simplicity we're only following direct image texture nodes
+    // Anything more complex is probably out of scope for assimp
+    if (baseColorSocket) {
+        for (std::shared_ptr<bNodeLink> link = std::static_pointer_cast<bNodeLink>(nodetree->links.first); link; link = link->next) {
+            if (link->tosocket == baseColorSocket && aiString("Color") == link->fromsocket->identifier) {
+                std::shared_ptr<bNode> colorNode = link->fromnode;
+            }
         }
     }
 }

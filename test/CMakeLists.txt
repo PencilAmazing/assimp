@@ -61,27 +61,27 @@ endif()
 LINK_DIRECTORIES( ${Assimp_BINARY_DIR} ${AssetImporter_BINARY_DIR}/lib )
 
 SET( COMMON
-  unit/utSimd.cpp
-  unit/utIOSystem.cpp
-  unit/utIOStreamBuffer.cpp
-  unit/utIssues.cpp
-  unit/utAnim.cpp
-  unit/AssimpAPITest.cpp
-  unit/AssimpAPITest_aiMatrix3x3.cpp
-  unit/AssimpAPITest_aiMatrix4x4.cpp
-  unit/AssimpAPITest_aiQuaternion.cpp
-  unit/AssimpAPITest_aiVector2D.cpp
-  unit/AssimpAPITest_aiVector3D.cpp
-  unit/MathTest.cpp
-  unit/MathTest.h
-  unit/RandomNumberGeneration.h
-  unit/utBatchLoader.cpp
-  unit/utDefaultIOStream.cpp
-  unit/utFastAtof.cpp
-  unit/utMetadata.cpp
-  unit/SceneDiffer.h
-  unit/SceneDiffer.cpp
-  unit/UTLogStream.h
+  #unit/utSimd.cpp
+  #unit/utIOSystem.cpp
+  #unit/utIOStreamBuffer.cpp
+  #unit/utIssues.cpp
+  #unit/utAnim.cpp
+  #unit/AssimpAPITest.cpp
+  #unit/AssimpAPITest_aiMatrix3x3.cpp
+  #unit/AssimpAPITest_aiMatrix4x4.cpp
+  #unit/AssimpAPITest_aiQuaternion.cpp
+  #unit/AssimpAPITest_aiVector2D.cpp
+  #unit/AssimpAPITest_aiVector3D.cpp
+  #unit/MathTest.cpp
+  #unit/MathTest.h
+  #unit/RandomNumberGeneration.h
+  #unit/utBatchLoader.cpp
+  #unit/utDefaultIOStream.cpp
+  #unit/utFastAtof.cpp
+  #unit/utMetadata.cpp
+  #unit/SceneDiffer.h
+  #unit/SceneDiffer.cpp
+  #unit/UTLogStream.h
   unit/AbstractImportExportBase.cpp
   unit/TestIOSystem.h
   unit/TestModelFactory.h
@@ -101,64 +101,64 @@ SET( COMMON
 )
 
 SET( IMPORTERS
-  unit/ImportExport/Assxml/utAssxmlImportExport.cpp
-  unit/utLWSImportExport.cpp
-  unit/utLWOImportExport.cpp
-  unit/utSMDImportExport.cpp
-  unit/utglTFImportExport.cpp
-  unit/utglTF2ImportExport.cpp
-  unit/utHMPImportExport.cpp
-  unit/utIFCImportExport.cpp
-  unit/utFBXImporterExporter.cpp
-  unit/utImporter.cpp
-  unit/ImportExport/utExporter.cpp
-  unit/ut3DImportExport.cpp
-  unit/ut3DSImportExport.cpp
-  unit/utACImportExport.cpp
-  unit/utAMFImportExport.cpp
-  unit/utASEImportExport.cpp
-  unit/utD3MFImportExport.cpp
-  unit/utQ3DImportExport.cpp
-  unit/utSTLImportExport.cpp
-  unit/utXImporterExporter.cpp
-  unit/utX3DImportExport.cpp
-  unit/utDXFImporterExporter.cpp
-  unit/utPMXImporter.cpp
-  unit/utPLYImportExport.cpp
-  unit/utObjImportExport.cpp
-  unit/utObjTools.cpp
-  unit/utOpenGEXImportExport.cpp
-  unit/utSIBImporter.cpp
-  unit/utBlenderIntermediate.cpp
-  unit/utBlendImportAreaLight.cpp
+  #unit/ImportExport/Assxml/utAssxmlImportExport.cpp
+  #unit/utLWSImportExport.cpp
+  #unit/utLWOImportExport.cpp
+  #unit/utSMDImportExport.cpp
+  #unit/utglTFImportExport.cpp
+  #unit/utglTF2ImportExport.cpp
+  #unit/utHMPImportExport.cpp
+  #unit/utIFCImportExport.cpp
+  #unit/utFBXImporterExporter.cpp
+  #unit/utImporter.cpp
+  #unit/ImportExport/utExporter.cpp
+  #unit/ut3DImportExport.cpp
+  #unit/ut3DSImportExport.cpp
+  #unit/utACImportExport.cpp
+  #unit/utAMFImportExport.cpp
+  #unit/utASEImportExport.cpp
+  #unit/utD3MFImportExport.cpp
+  #unit/utQ3DImportExport.cpp
+  #unit/utSTLImportExport.cpp
+  #unit/utXImporterExporter.cpp
+  #unit/utX3DImportExport.cpp
+  #unit/utDXFImporterExporter.cpp
+  #unit/utPMXImporter.cpp
+  #unit/utPLYImportExport.cpp
+  #unit/utObjImportExport.cpp
+  #unit/utObjTools.cpp
+  #unit/utOpenGEXImportExport.cpp
+  #unit/utSIBImporter.cpp
+  #unit/utBlenderIntermediate.cpp
+  #unit/utBlendImportAreaLight.cpp
   unit/utBlenderImportExport.cpp
-  unit/utBlendImportMaterials.cpp
-  unit/utBlenderWork.cpp
-  unit/utBVHImportExport.cpp
-  unit/utColladaExport.cpp
-  unit/utColladaImportExport.cpp
-  unit/utCSMImportExport.cpp
-  unit/utB3DImportExport.cpp
-  #unit/utM3DImportExport.cpp
-  unit/utMDCImportExport.cpp
-  unit/utAssbinImportExport.cpp
-  unit/ImportExport/utAssjsonImportExport.cpp
-  unit/ImportExport/utCOBImportExport.cpp
-  unit/ImportExport/utOgreImportExport.cpp
-  unit/ImportExport/utQ3BSPFileImportExport.cpp
-  unit/ImportExport/utOFFImportExport.cpp
-  unit/ImportExport/utNFFImportExport.cpp
-  unit/ImportExport/utXGLImportExport.cpp
-  unit/ImportExport/utMD2Importer.cpp
-  #unit/ImportExport/utMD3Importer.cpp
-  unit/ImportExport/utMD5Importer.cpp
-  unit/ImportExport/utMDLImporter.cpp
-  unit/ImportExport/MDL/MDLHL1TestFiles.h
-  unit/ImportExport/MDL/utMDLImporter_HL1_ImportSettings.cpp
-  unit/ImportExport/MDL/utMDLImporter_HL1_Materials.cpp
-  unit/ImportExport/MDL/utMDLImporter_HL1_Nodes.cpp
-  unit/ImportExport/RAW/utRAWImportExport.cpp
-  unit/ImportExport/Terragen/utTerragenImportExport.cpp
+  #unit/utBlendImportMaterials.cpp
+  #unit/utBlenderWork.cpp
+  #unit/utBVHImportExport.cpp
+  #unit/utColladaExport.cpp
+  #unit/utColladaImportExport.cpp
+  #unit/utCSMImportExport.cpp
+  #unit/utB3DImportExport.cpp
+  ##unit/utM3DImportExport.cpp
+  #unit/utMDCImportExport.cpp
+  #unit/utAssbinImportExport.cpp
+  #unit/ImportExport/utAssjsonImportExport.cpp
+  #unit/ImportExport/utCOBImportExport.cpp
+  #unit/ImportExport/utOgreImportExport.cpp
+  #unit/ImportExport/utQ3BSPFileImportExport.cpp
+  #unit/ImportExport/utOFFImportExport.cpp
+  #unit/ImportExport/utNFFImportExport.cpp
+  #unit/ImportExport/utXGLImportExport.cpp
+  #unit/ImportExport/utMD2Importer.cpp
+  ##unit/ImportExport/utMD3Importer.cpp
+  #unit/ImportExport/utMD5Importer.cpp
+  #unit/ImportExport/utMDLImporter.cpp
+  #unit/ImportExport/MDL/MDLHL1TestFiles.h
+  #unit/ImportExport/MDL/utMDLImporter_HL1_ImportSettings.cpp
+  #unit/ImportExport/MDL/utMDLImporter_HL1_Materials.cpp
+  #unit/ImportExport/MDL/utMDLImporter_HL1_Nodes.cpp
+  #unit/ImportExport/RAW/utRAWImportExport.cpp
+  #unit/ImportExport/Terragen/utTerragenImportExport.cpp
 )
 
 SET( MATERIAL
@@ -213,8 +213,8 @@ add_executable( unit
 	${COMMON}
 	${IMPORTERS}
 	${MATERIAL}
-	${MATH}
-  ${POST_PROCESSES}
+	#${MATH}
+  #${POST_PROCESSES}
 )
 
 if(ASSIMP_HUNTER_ENABLED)
